@@ -97,6 +97,40 @@ namespace OOPTask
             guests.Add(new Guest(id, name, "Not Assigned", date, nights));
             Console.WriteLine("Guest registered successfully! ID:" + id);
         }
+        public static void BookRoom(List<Room> rooms, List<Guest> guests)
+        {
+            Console.Write("Guest ID: ");
+            string id = Console.ReadLine();
+            var guest = guests.FirstOrDefault(g => g.guestId == id);
+            if (guest == null)
+            {
+                Console.WriteLine("Guest not found!");
+                return;
+            }
+            Console.Write("Room number: ");
+            string roomNo = Console.ReadLine();
+            var room = rooms.FirstOrDefault(r => r.roomNumber == roomNo);
+            if (room == null)
+            {
+                Console.WriteLine("Room not found!");
+                return;
+            }
+            if (!room.isAvailable)
+            {
+                Console.WriteLine("Room is already booked!");
+                return;
+            }
+            guest.roomNumber = room.roomNumber;
+            room.isAvailable = false;
+            double total = guest.calculateTotalCost(room);
+            Console.WriteLine("BOOKING CONFIRMED");
+            Console.WriteLine("Guest: " + guest.guestName);
+            Console.WriteLine("Room: " + room.roomNumber + room.roomType);
+            Console.WriteLine("Price: "+room.pricePerNight);
+            Console.WriteLine("Nights: "+ guest.totalNights);
+            Console.WriteLine("Total: " + total + "OMR" );
+        }
+
 
         static void Main(string[] args)
         {
@@ -137,6 +171,7 @@ namespace OOPTask
                         RegisterGuest(guests);
                         break;
                     case 3:
+                        BookRoom(rooms, guests);
                         break;
                     case 4:
                         break;
