@@ -130,7 +130,52 @@ namespace OOPTask
             Console.WriteLine("Nights: "+ guest.totalNights);
             Console.WriteLine("Total: " + total + "OMR" );
         }
+        public static void SearchRooms(List<Room> rooms)
+        {
+            Console.WriteLine("1- Available rooms");
+            Console.WriteLine("2- By type");
+            Console.WriteLine("3- Max price");
+            Console.WriteLine("4- Statistics");
+            Console.Write("Enter your choice: ");
+            int choice = int.Parse(Console.ReadLine());          
+            if (choice == 1)
+            {
+                var result = rooms.Where(r => r.isAvailable).OrderBy(r => r.pricePerNight).ToList();
+                Console.WriteLine("Count: " + result.Count);
 
+                result.ForEach(r => r.DisplayRoom());
+            }
+            else if (choice == 2)
+            {
+                Console.Write("Type: ");
+                string type = Console.ReadLine();
+
+                var result = rooms.Where(r => r.roomType == type).ToList();
+                Console.WriteLine("Count: " + result.Count);
+
+                result.ForEach(r => r.DisplayRoom());
+            }
+            else if (choice == 3)
+            {
+                Console.Write("Max price: ");
+                double max = double.Parse(Console.ReadLine());
+
+                var result = rooms.Where(r => r.isAvailable && r.pricePerNight <= max)
+                                  .OrderBy(r => r.pricePerNight)
+                                  .ToList();
+
+                Console.WriteLine("Count: " + result.Count);
+                result.ForEach(r => r.DisplayRoom());
+            }
+            else if (choice == 4)
+            {
+                Console.WriteLine(" Total rooms: " + rooms.Count + "\n");
+                Console.WriteLine(" Available: " + rooms.Count(r => r.isAvailable) );
+                Console.WriteLine(" Avg price: " + rooms.Average(r => r.pricePerNight));
+                Console.WriteLine(" Min price: " + rooms.Min(r => r.pricePerNight));
+                Console.WriteLine(" Max price: " + rooms.Max(r => r.pricePerNight));
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -174,6 +219,7 @@ namespace OOPTask
                         BookRoom(rooms, guests);
                         break;
                     case 4:
+                        SearchRooms(rooms);
                         break;
                     case 5:
                         break;
