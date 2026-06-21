@@ -176,6 +176,71 @@ namespace OOPTask
                 Console.WriteLine(" Max price: " + rooms.Max(r => r.pricePerNight));
             }
         }
+        public static void Statistics(List<Room> rooms, List<Guest> guests)
+        {
+            Console.WriteLine("Total guests: " + guests.Count);
+            Console.WriteLine("Active bookings: " + guests.Count(g => g.roomNumber != "Not Assigned"));
+            Console.WriteLine("Total rooms: " + rooms.Count);
+            Console.WriteLine("Booked rooms: " + rooms.Count(r => !r.isAvailable));
+            var activeGuests = guests.Where(g => g.roomNumber != "Not Assigned").ToList();
+            if (!activeGuests.Any())
+            {
+                Console.WriteLine("No active bookings recorded");
+                return;
+            }
+            Console.WriteLine("Avg nights: " + activeGuests.Average(g => g.totalNights));
+            var top = activeGuests
+                .OrderByDescending(g => g.calculateTotalCost(rooms.First(r => r.roomNumber == g.roomNumber)))
+                .Take(3);
+            foreach (var g in top)
+            {
+                var room = rooms.First(r => r.roomNumber == g.roomNumber);
+                Console.WriteLine(g.guestName + " | " + g.roomNumber + " | OMR " +g.calculateTotalCost(room).ToString("F2"));
+            }
+        }
+        public static void Checkout(List<Room> rooms, List<Guest> guests)
+        {
+            Console.Write("Guest ID: ");
+            string id = Console.ReadLine();
+            var guest = guests.FirstOrDefault(g => g.guestId == id);
+            if (guest == null)
+            {
+                Console.WriteLine("Guest not found!");
+                return;
+            }
+            if (guest.roomNumber == "Not Assigned")
+            {
+                Console.WriteLine("No active booking!");
+                return;
+            }
+            var room = rooms.FirstOrDefault(r => r.roomNumber == guest.roomNumber);
+            double total = guest.calculateTotalCost(room);
+            Console.WriteLine("Final bill: " + guest.guestName +", Room " + room.roomNumber +", Total OMR " + total.ToString("F2"));
+            Console.Write("Confirm checkout (Y/N): ");
+            if (Console.ReadLine().ToUpper() == "Y")
+            {
+                room.isAvailable = true;
+                guests.Remove(guest);
+
+                Console.WriteLine("Checkout completed!");
+            }
+        }
+        public static void RemoveRooms(List<Room> rooms, List<Guest> guests)
+        {
+            var removable = rooms.Where(r => !r.isAvailable &&!guests.Any(g => g.roomNumber == r.roomNumber)).OrderBy(r => r.roomNumber).ToList();
+            if (!removable.Any())
+            {
+                Console.WriteLine("No rooms can be decommissioned.");
+                return;
+            }
+            removable.ForEach(r => r.DisplayRoom());
+            Console.Write("Confirm removal (Y/N): ");
+            if (Console.ReadLine().ToUpper() == "Y")
+            {
+                rooms.RemoveAll(r => !r.isAvailable &&!guests.Any(g => g.roomNumber == r.roomNumber));
+                Console.WriteLine("Updated rooms: " + rooms.Count);
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -222,18 +287,18 @@ namespace OOPTask
                         SearchRooms(rooms);
                         break;
                     case 5:
+                        Statistics(rooms, guests);
                         break;
                     case 6:
+                        Checkout(rooms, guests);
                         break;
                     case 7:
+                        RemoveRooms(rooms, guests);
                         break;
                     case 0:
                         return;
                 }
             }
-
-            
-
         }
     }
 } 
